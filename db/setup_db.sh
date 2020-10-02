@@ -22,33 +22,33 @@ EOF
 exit 0
 }
 prepare_db(){
-  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h localhost -c \"create schema smartrider;\""
-  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h localhost -c \"CREATE EXTENSION postgis;\""
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -c \"create schema smartrider;\""
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -c \"CREATE EXTENSION postgis;\""
 }
 install_shp2pgsql(){
   docker exec postgis bash -c "apt-get update;apt-get -y install postgis;/etc/init.d/postgresql reload"
 }
 load_taxizone(){
-  docker exec postgis bash -c "shp2pgsql -s 2263:4326 -I /mnt/shapefile/taxi_zones/taxi_zones.shp | PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h localhost"
-  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h localhost -c \"CREATE INDEX ON taxi_zones (locationid);\""
-  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h localhost -c \"VACUUM ANALYZE taxi_zones;\""
+  docker exec postgis bash -c "shp2pgsql -s 2263:4326 -I /mnt/shapefile/taxi_zones/taxi_zones.shp | PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST"
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -c \"CREATE INDEX ON taxi_zones (locationid);\""
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -c \"VACUUM ANALYZE taxi_zones;\""
 }
 load_nyct(){
-  docker exec postgis bash -c "shp2pgsql -s 2263:4326 -I /mnt/shapefile/nyct2010_20c/nyct2010.shp | PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h localhost"
-  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h localhost -c \"CREATE INDEX ON nyct2010 (ntacode);\""
-  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h localhost -c \"VACUUM ANALYZE nyct2010;\""
+  docker exec postgis bash -c "shp2pgsql -s 2263:4326 -I /mnt/shapefile/nyct2010_20c/nyct2010.shp | PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST"
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -c \"CREATE INDEX ON nyct2010 (ntacode);\""
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -c \"VACUUM ANALYZE nyct2010;\""
 }
 load_lion(){
-  docker exec postgis bash -c "shp2pgsql -s 4326 -I /mnt/shapefile/nyclion_20c/LION.shp | PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h localhost"
-  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h localhost -f /mnt/sql/refine_lion.sql"
-  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h localhost -c \"CREATE INDEX ON lion (segmentid);\""
-  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h localhost -c \"VACUUM ANALYZE lion;\""
+  docker exec postgis bash -c "shp2pgsql -s 4326 -I /mnt/shapefile/nyclion_20c/LION.shp | PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST"
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/sql/refine_lion.sql"
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -c \"CREATE INDEX ON lion (segmentid);\""
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -c \"VACUUM ANALYZE lion;\""
 }
 
 create_mapping(){
-  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h localhost -f /mnt/sql/create_mapping.sql"
-  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h localhost -f /mnt/sql/add_newark_airport.sql"
-  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h localhost -f /mnt/sql/create_taxi_fare.sql"
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/sql/create_mapping.sql"
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/sql/add_newark_airport.sql"
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/sql/create_taxi_fare.sql"
 }
 while getopts "aiptclm" OPTION
 do
