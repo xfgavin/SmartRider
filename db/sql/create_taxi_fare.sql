@@ -1,0 +1,10 @@
+CREATE TABLE TAXIFARE (
+	ZONEID SMALLINT NOT NULL DEFAULT 0,
+	pickup_month SMALLINT NOT NULL DEFAULT 0,
+	pickup_hour SMALLINT NOT NULL DEFAULT 0,
+	TrafficCondition SMALLINT NOT NULL DEFAULT 0,
+	rate_avg REAL NOT NULL DEFAULT 0,
+	isholiday SMALLINT NOT NULL DEFAULT 0,
+	isweekend SMALLINT NOT NULL DEFAULT 0
+);
+CREATE INDEX ON TAXIFARE (ZONEID, pickup_month, pickup_hour, TrafficCondition, isholiday, isweekend);
