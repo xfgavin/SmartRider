@@ -1,0 +1,13 @@
+all:
+  children:
+    aws:
+      children:
+        spark-master:
+          hosts:
+            spark-master.dtrace.net:
+        spark-worker1:
+          hosts:
+            spark-worker1.dtrace.net:
+        postgis:
+          hosts:
+            postgis.dtrace.net:

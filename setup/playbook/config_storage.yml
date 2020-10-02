@@ -1,0 +1,36 @@
+---
+- hosts: aws
+  gather_facts: no
+  become: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  tasks:
+    - name: Create Volume group.
+      lvg:
+        pvs: "/dev/xvdb"
+        vg: "smartrider"
+        state: present
+ 
+    - name: Create Logical Volume.
+      lvol:
+        vg: "smartrider"
+        lv: "data"
+        size: "100%FREE"
+        active: yes
+        force: no
+        state: present
+    
+    - name: Create filesystem
+      filesystem:
+        fstype: "ext4"
+        dev: "/dev/mapper/smartrider-data"
+        force: no
+
+    #####No need to modify /etc/fstab, since this step will add an entry for it.
+    - name: Mount storage
+      mount:
+        path: "/opt"
+        src: "/dev/mapper/smartrider-data"
+        fstype: "ext4"
+        opts: defaults
+        state: mounted

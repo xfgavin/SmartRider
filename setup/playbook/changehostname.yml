@@ -1,0 +1,12 @@
+---
+- hosts: aws
+  gather_facts: no
+  become: yes
+  ignore_errors: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  tasks:
+    - name: Change hostname
+      shell: "sed -e 's/ip-10-0-0-9/postgis/g' -e 's/ip-10-0-0-5/spark-worker1/g' -e 's/ip-10-0-0-14/spark-master/g' -i /etc/hostname"
+    - name: Reboot
+      shell: "/sbin/reboot"
