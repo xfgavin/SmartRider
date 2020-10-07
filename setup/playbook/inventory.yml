@@ -8,6 +8,12 @@ all:
         spark-worker1:
           hosts:
             spark-worker1.dtrace.net:
+        spark-worker2:
+          hosts:
+            spark-worker2.dtrace.net:
+        spark-worker3:
+          hosts:
+            spark-worker3.dtrace.net:
         postgis:
           hosts:
             postgis.dtrace.net:

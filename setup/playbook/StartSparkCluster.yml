@@ -5,5 +5,7 @@
   vars:
     ansible_python_interpreter: /usr/bin/python3
   tasks:
+    - name: Build slave list
+      shell: "[ ! -f /opt/spark/conf/slaves ] && grep spark /etc/hosts|awk '{print $2}'|sort|uniq > /opt/spark/conf/slaves"
     - name: Start Spark Cluster
       shell: "/opt/spark/sbin/start-all.sh"

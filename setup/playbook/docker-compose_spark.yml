@@ -1,0 +1,23 @@
+version: '2'
+networks:
+  monitor-net:
+    driver: bridge
+services:
+  node-exporter:
+    hostname: HOST
+    domainname: dtrace.net
+    image: prom/node-exporter
+    ports:
+      - '9910:9100'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    restart: unless-stopped
+    networks:
+      - monitor-net

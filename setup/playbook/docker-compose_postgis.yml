@@ -1,0 +1,51 @@
+version: '2.1'
+networks:
+   status_net:
+      driver: bridge
+services:
+  prometheus:
+    hostname: PROMETHEUS
+    domainname: dtrace.net
+    image: prom/prometheus
+    volumes:
+      - /opt/www/status.fmri.cn/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /archive/status.fmri.cn/prometheus:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - status_net
+        #ports:
+        #- '9900:9090'
+  postgis-node:
+    hostname: postgis
+    domainname: dtrace.net
+    image: prom/node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    restart: unless-stopped
+    networks:
+      - status_net
+  grafana:
+    hostname: Grafana
+    domainname: dtrace.net
+    image: grafana/grafana
+    volumes:
+      - /tmp/grafana:/var/lib/grafana
+      - /opt/www/status.fmri.cn/grafana.ini:/etc/grafana/grafana.ini:ro
+      - /etc/cert/fullchain.cer:/etc/grafana/fullchain.pem:ro
+      - /etc/cert/fmri.cn.key:/etc/grafana/privkey.pem:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=2132491040
+    depends_on:
+      - prometheus
+    ports:
+      - '443:8443'
+    networks:
+      - status_net

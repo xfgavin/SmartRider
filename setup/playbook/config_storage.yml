@@ -34,3 +34,9 @@
         fstype: "ext4"
         opts: defaults
         state: mounted
+    - name: Let ubuntu to own /opt
+      file:
+        path: /opt
+        owner: AWSUSER
+        group: AWSUSER
+        mode: '0755'
