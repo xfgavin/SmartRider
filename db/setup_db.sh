@@ -48,7 +48,7 @@ load_lion(){
 create_mapping(){
   docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/sql/create_mapping.sql"
   docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/sql/add_newark_airport.sql"
-  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/sql/create_taxi_fare.sql"
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/sql/create_tripdata.sql"
 }
 while getopts "aiptclm" OPTION
 do

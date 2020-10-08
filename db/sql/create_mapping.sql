@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS lion_taxi_zones_mapping;
 CREATE TABLE lion_taxi_zones_mapping AS
 SELECT
   ct.segmentid AS segmentid,
@@ -7,6 +8,7 @@ WHERE ST_Intersects(ct.geom, tz.geom);
 
 CREATE INDEX ON lion_taxi_zones_mapping (segmentid, taxi_zone_location_id);
 
+DROP TABLE IF EXISTS nyct2010_taxi_zones_mapping;
 CREATE TABLE nyct2010_taxi_zones_mapping AS
 SELECT
   ct.gid AS nyct2010_gid,
