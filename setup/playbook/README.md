@@ -34,3 +34,5 @@ Recommended steps:
 2. changehostname.sh: this script will modify hostnames of the cluster
 3. config_storage.sh: if you setup extra storage attached to your servers, you may use this script to setup.
 4. StartSparkCluster.sh: you may use this script to start your spark cluster.
+
+If you receive error when installing rtree, you may consider install python3-rtree package provided by ubuntu instead.
