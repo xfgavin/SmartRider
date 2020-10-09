@@ -10,10 +10,14 @@ Required steps:
 3. modify installApps.yml accordingly (IP address, hostname, packages).
 4. modify changehostname.yml accordingly.
 5. make sure you have following environment variables in your .profile or .bashrc:
+```
 export AWS_SECRET_ACCESS_KEY=xxxxxx
 export AWS_ACCESS_KEY_ID=xxxxxx
 export AWS_SSH_KEY=~/path/to/IAM-keypair.pem
 export AWS_USER=USER
+export DBUSER=USER
+export DBPWD=PASSWORD
+```
 6. source your .profile or .bashrc
 
 Recommended steps:
