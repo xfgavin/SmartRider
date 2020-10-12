@@ -6,15 +6,70 @@
   vars:
     ansible_python_interpreter: /usr/bin/python3
   tasks:
-    - name: Pull node exporter image
-      shell: "docker pull prom/node-exporter"
-    - name: Add user to docker group
-      shell: "usermod -aG docker AWSUSER"
+#    - name: Pull node exporter image
+#      shell: "docker pull prom/node-exporter"
+#    - name: Add user to docker group
+#      shell: "usermod -aG docker AWSUSER"
+    - name: Create directory for monitoring
+      file:
+        path: /opt/www/status.dtrace.net
+        state: directory
+        owner: AWSUSER
+        group: AWSUSER
+        mode: '0755'
+    - name: Copy monitoring scripts
+      copy:
+        src: launch_monitor.sh
+        dest: /opt/www/status.dtrace.net/launch_monitor.sh
+        owner: AWSUSER
+        group: AWSUSER
+        mode: '0755'
+    - name: Copy monitoring scripts
+      copy:
+        src: stop_monitor.sh
+        dest: /opt/www/status.dtrace.net/stop_monitor.sh
+        owner: AWSUSER
+        group: AWSUSER
+        mode: '0755'
+- hosts: spark*
+  gather_facts: no
+  become: yes
+  ignore_errors: True
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  tasks:
+    - name: Copy monitoring yml
+      copy:
+        src: docker-compose_spark.yml
+        dest: /opt/www/status.dtrace.net/docker-compose.yml
+        owner: AWSUSER
+        group: AWSUSER
+        mode: '0644'
+    - name: launch monitors
+      shell: "/opt/www/status.dtrace.net/launch_monitor.sh"
 - hosts: postgis*
   gather_facts: no
   become: yes
   vars:
     ansible_python_interpreter: /usr/bin/python3
   tasks:
-    - name: Pull postgres exporter image
-      shell: "docker pull wrouesnel/postgres_exporter; docker pull grafana/grafana; docker pull prom/prometheus"
+#    - name: Pull postgres exporter image
+#      shell: "docker pull wrouesnel/postgres_exporter; docker pull grafana/grafana; docker pull prom/prometheus"
+    - name: Copy monitoring yml
+      copy:
+        src: docker-compose_postgis_tmp.yml
+        dest: /opt/www/status.dtrace.net/docker-compose.yml
+        owner: AWSUSER
+        group: AWSUSER
+        mode: '0644'
+    - name: Copy prometheus yml
+      copy:
+        src: prometheus.yml
+        dest: /opt/www/status.dtrace.net/prometheus.yml
+        owner: AWSUSER
+        group: AWSUSER
+        mode: '0644'
+    - name: Create volumes for grafana and prometheus
+      shell: "docker volume create grafana;docker volume create prometheus"
+    - name: launch monitors
+      shell: "/opt/www/status.dtrace.net/launch_monitor.sh"

@@ -4,7 +4,6 @@ networks:
     driver: bridge
 services:
   node-exporter:
-    hostname: HOST
     domainname: dtrace.net
     image: prom/node-exporter
     ports:

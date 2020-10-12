@@ -8,8 +8,8 @@ services:
     domainname: dtrace.net
     image: prom/prometheus
     volumes:
-      - /opt/www/status.fmri.cn/prometheus.yml:/etc/prometheus/prometheus.yml
-      - /archive/status.fmri.cn/prometheus:/prometheus
+      - /opt/www/status.dtrace.net/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     networks:
@@ -32,20 +32,30 @@ services:
     restart: unless-stopped
     networks:
       - status_net
+  postgis-exporter:
+    container_name: postgis-exporter
+    hostname: postgis
+    domainname: dtrace.net
+    image: wrouesnel/postgres_exporter
+    restart: always
+    environment:
+      DATA_SOURCE_NAME: "postgresql://DBUSER:DBPWD@localhost:5432/postgres?sslmode=disable"
+      PG_EXPORTER_WEB_LISTEN_ADDRESS: ":9911"
+    network_mode: "host"
   grafana:
     hostname: Grafana
     domainname: dtrace.net
     image: grafana/grafana
     volumes:
-      - /tmp/grafana:/var/lib/grafana
-      - /opt/www/status.fmri.cn/grafana.ini:/etc/grafana/grafana.ini:ro
-      - /etc/cert/fullchain.cer:/etc/grafana/fullchain.pem:ro
-      - /etc/cert/fmri.cn.key:/etc/grafana/privkey.pem:ro
+      - grafana:/var/lib/grafana
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=2132491040
+      - GF_SECURITY_ADMIN_PASSWORD=insightDE20C
     depends_on:
       - prometheus
     ports:
-      - '443:8443'
+      - '3000:3000'
     networks:
       - status_net
+volumes:
+   prometheus:
+   grafana:
