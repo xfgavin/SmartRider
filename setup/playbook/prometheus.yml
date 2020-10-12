@@ -11,14 +11,14 @@ scrape_configs:
           - '10.0.0.7:9910'
           - '10.0.0.13:9910'
           - '10.0.0.10:9910'
-          - 'postgis:9100'
+          - 'postgis-node:9100'
     - job_name: 'Spark'
       scrape_interval: 30s
       metrics_path: /metrics
       honor_labels: true
       static_configs:
         - targets: ["10.0.0.8:9911"]
-    - job_name: 'PostGres'
+    - job_name: 'postgis'
       scrape_interval: 30s
       metrics_path: /metrics
       honor_labels: true
