@@ -8,13 +8,15 @@ by xfgavin@gmail.com 09/30/2020 @RB
 +++++++++++++++++++++++++++++++++++++++++++++++++++++
 usage: `basename $0` options
 OPTIONS:
-   -a      Do all steps
+   -a      Do all steps except update rates
    -i      Install shp2pgsql
    -p      prepare database
    -t      load NY Taxi zone shape file
    -c      load NY census tract shape file
    -l      load NY LION shape file
    -m      create mapping between LION and taxi zone, and between taxi zone and census tract, add airport
+   -f      init airflow
+   -u      update rates
 Example:
   `basename $0` -i /path/to/csv -c column1
 EOF
@@ -40,15 +42,21 @@ load_nyct(){
 }
 load_lion(){
   docker exec postgis bash -c "shp2pgsql -s 4326 -I /mnt/shapefile/nyclion_20c/LION.shp | PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST"
-  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/sql/refine_lion.sql"
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/db/sql/refine_lion.sql"
   docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -c \"CREATE INDEX ON lion (segmentid);\""
   docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -c \"VACUUM ANALYZE lion;\""
 }
 
 create_mapping(){
-  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/sql/create_mapping.sql"
-  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/sql/add_newark_airport.sql"
-  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/sql/create_tripdata.sql"
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/db/sql/create_mapping.sql"
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/db/sql/add_newark_airport.sql"
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/db/sql/create_tripdata.sql"
+}
+init_airflow(){
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/db/sql/init_airflow.sql"
+}
+update_rates(){
+  docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/db/sql/calc_rate.sql"
 }
 while getopts "aiptclm" OPTION
 do
@@ -60,6 +68,7 @@ do
       load_nyct
       load_lion
       create_mapping
+      init_airflow
       ;;
     i)
       install_shp2pgsql
@@ -76,8 +85,14 @@ do
     l)
       load_lion
       ;;
+    f)
+      init_airflow
+      ;;
     m)
       create_mapping
+      ;;
+    u)
+      update_rates
       ;;
     ?)
       Usage
