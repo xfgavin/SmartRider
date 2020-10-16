@@ -134,7 +134,44 @@ app.layout = html.Div([
                 'paddingTop' : 0,
                 'paddingBottom' : 0
             }
-    )
+    ),
+    ##########################
+    #Reference NYC TLC and project's github
+    html.Div([
+        html.Br(),
+        html.Br(),
+        html.Div([
+            html.A(
+                html.Img(
+                    src=app.get_asset_url('nyc-tlc-logo.png'),
+                    style={
+                        'height':'20%',
+                        'width':'20%'
+                    },
+                    alt='Based on NYC TLC trip data 2009-present'
+                ),
+                href='https://registry.opendata.aws/nyc-tlc-trip-records-pds/',
+                target='_blank',
+                title='Based on NYC TLC trip data 2009-present'
+            ),
+            html.A(
+                html.Img(
+                    src=app.get_asset_url('github.png'),
+                    style={
+                        'height':'5%',
+                        'width':'5%'
+                    },
+                    alt='Check out source code on github'
+                ),
+                href='https://github.com/xfgavin/smartrider',
+                target='_blank',
+                title='Check out source code on github'
+            )],
+            style={
+                'float': 'right'
+            }
+        )
+    ])
 ])
 
 ######################
@@ -233,7 +270,6 @@ def getdata(sql):
 
 if __name__ == '__main__':
     myloc = None
-
     try:
         conn = psycopg2.connect(
                host=os.environ['PGHOST'],
