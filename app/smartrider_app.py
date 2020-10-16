@@ -39,7 +39,7 @@ app.layout = html.Div([
                 value=dt.now().month,
                 step=1,
                 marks={1:'Jan',2:'Feb',3:'Mar',4:'Apr',5:'May',6:'Jun',7:'Jul',8:'Aug',9:'Sep',10:'Oct',11:'Nov',12:'Dec'},
-                updatemode='drag'
+                disabled=True
             ),
         ],
         style={
@@ -95,7 +95,7 @@ app.layout = html.Div([
                 options=[
                 {'label': 'Yes', 'value': 1}
                 ],
-                value=1
+                value=[1]
             ),
         ],
         style={
@@ -120,12 +120,7 @@ app.layout = html.Div([
                         id='ratesgraph',
                         style={
                             'display': 'none'
-                        },
-                        figure={
-                        'layout': go.Layout(
-                            paper_bgcolor='rgba(0,0,0,0)',
-                            plot_bgcolor='rgba(0,0,0,0)'
-                        )}
+                        }
                     )],
                     style={
                         'width': '100%',
@@ -145,7 +140,7 @@ app.layout = html.Div([
 ######################
 #Handle HTML element status change events
 
-@app.callback([Output('ratesgraph','style'),Output('ratesgraph','figure'),Output('layer', 'children')],
+@app.callback([Output('departure_month','disabled'),Output('ratesgraph','style'),Output('ratesgraph','figure'),Output('layer', 'children')],
               [Input("map", "click_lat_lng"),
                Input('departure_month', 'value'),
                Input('traffic', 'value'),
@@ -166,10 +161,12 @@ def update_graph(click_lat_lng,departure_month,traffic,covid):
             mysql_weekday = 'SELECT avg(rate) as rate from rates where traffic=' + str(traffic) + ' AND iscovid=1 AND isweekend=0 AND zoneid in (SELECT locationid from taxi_zones where ST_intersects(ST_SetSRID( ST_Point(' + str(click_lat_lng[1]) + ', ' + str(click_lat_lng[0]) + '),4326),geom))  group by target_hour order by target_hour;'
             mysql_weekend = 'SELECT avg(rate) as rate from rates where traffic=' + str(traffic) + ' AND iscovid=1 AND isweekend=1 AND zoneid in (SELECT locationid from taxi_zones where ST_intersects(ST_SetSRID( ST_Point(' + str(click_lat_lng[1]) + ', ' + str(click_lat_lng[0]) + '),4326),geom))  group by target_hour order by target_hour;'
             mysql_holiday = 'SELECT avg(rate) as rate from rates where traffic=' + str(traffic) + ' AND iscovid=1 AND isholiday=1 AND zoneid in (SELECT locationid from taxi_zones where ST_intersects(ST_SetSRID( ST_Point(' + str(click_lat_lng[1]) + ', ' + str(click_lat_lng[0]) + '),4326),geom))  group by target_hour order by target_hour;'
+            month_slider_disabled = True
         else:
             mysql_weekday = 'SELECT avg(rate) as rate from rates where target_month = ' + str(departure_month) + ' AND traffic=' + str(traffic) + ' AND iscovid=0 AND isweekend=0 AND zoneid in (SELECT locationid from taxi_zones where ST_intersects(ST_SetSRID( ST_Point(' + str(click_lat_lng[1]) + ', ' + str(click_lat_lng[0]) + '),4326),geom))  group by target_hour order by target_hour;'
             mysql_weekend = 'SELECT avg(rate) as rate from rates where target_month = ' + str(departure_month) + ' AND traffic=' + str(traffic) + ' AND iscovid=0 AND isweekend=1 AND zoneid in (SELECT locationid from taxi_zones where ST_intersects(ST_SetSRID( ST_Point(' + str(click_lat_lng[1]) + ', ' + str(click_lat_lng[0]) + '),4326),geom))  group by target_hour order by target_hour;'
             mysql_holiday = 'SELECT avg(rate) as rate from rates where target_month = ' + str(departure_month) + ' AND traffic=' + str(traffic) + ' AND iscovid=0 AND isholiday=1 AND zoneid in (SELECT locationid from taxi_zones where ST_intersects(ST_SetSRID( ST_Point(' + str(click_lat_lng[1]) + ', ' + str(click_lat_lng[0]) + '),4326),geom))  group by target_hour order by target_hour;'
+            month_slider_disabled = False
         #####################
         #Grab data
         result_weekday = getdata(mysql_weekday)
@@ -177,7 +174,7 @@ def update_graph(click_lat_lng,departure_month,traffic,covid):
         result_holiday = getdata(mysql_holiday)
         #####################
         #Show the graph, plot the graph, place marker on map.
-        return [{'display': 'block'}, plotresult(result_weekday,result_weekend,result_holiday),
+        return [month_slider_disabled,{'display': 'block'}, plotresult(result_weekday,result_weekend,result_holiday),
             dl.Marker(position=click_lat_lng, children=dl.Tooltip("({:.3f}, {:.3f})".format(*click_lat_lng)))
            ]
 
@@ -186,21 +183,38 @@ def update_graph(click_lat_lng,departure_month,traffic,covid):
 def plotresult(result_weekday,result_weekend,result_holiday):
     # Create traces
     bgcolor = '#e5ecf6'
+    
+    result_weekday = [round(x,2) for x in result_weekday]
+    result_weekend = [round(x,2) for x in result_weekend]
+    result_holiday = [round(x,2) for x in result_holiday]
     fig = go.Figure(layout=go.Layout(
-        title=go.layout.Title(text="Average taxi rate ($/Mile)"),
-        title_x=0.5
+        title=go.layout.Title(text="Taxi rate by hour"),
+        title_x=0.5,  # Sets background color to white
+        xaxis=dict(
+            title="Hour",
+            linecolor="#BCCCDC",  # Sets color of X-axis line
+            showgrid=False  # Removes X-axis grid lines
+        ),
+        yaxis=dict(
+            title="Rate ($/Mi)",  
+            linecolor="#BCCCDC",  # Sets color of Y-axis line
+            showgrid=False,  # Removes Y-axis grid lines    
+        )
     ))
-    fig.add_trace(go.Scatter(x=list(range(24)), y=result_weekday,
+    hour_list = ['12AM','1AM','2AM','3AM','4AM','5AM','6AM','7AM','8AM','9AM','10AM','11AM','12PM','1PM','2PM','3PM','4PM','5PM','6PM','7PM','8PM','9PM','10PM','11PM']
+    fig.add_trace(go.Scatter(x=hour_list, y=result_weekday,
                         mode='lines+markers',
                         name='Weekdays'))
-    fig.add_trace(go.Scatter(x=list(range(24)), y=result_weekend,
+    fig.add_trace(go.Scatter(x=hour_list, y=result_weekend,
                         mode='lines+markers',
                         name='Weekends'))
-    fig.add_trace(go.Scatter(x=list(range(24)), y=result_holiday,
+    fig.add_trace(go.Scatter(x=hour_list, y=result_holiday,
                         mode='lines+markers',
                         name='Holidays'))
-    fig.layout.plot_bgcolor = bgcolor
-    fig.layout.paper_bgcolor = bgcolor
+    fig.layout.plot_bgcolor = 'rgba(0,0,0,0)'
+    fig.layout.paper_bgcolor = 'rgba(0,0,0,0)'
+    fig.update_xaxes(type='category', showgrid=False, zeroline=False,tickangle = 90)
+    fig.update_yaxes(showgrid=False, zeroline=False)
     return fig
 
 ########################
