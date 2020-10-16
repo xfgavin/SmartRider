@@ -11,6 +11,8 @@ CREATE TABLE RATES(
 );
 CREATE INDEX ON RATES (ZONEID, target_month, target_hour, traffic, isholiday, isweekend, iscovid);
 
+CALL geo2zone();
+
 /*Generate average rates for holidays, including all holidays before 2020, and before Mar. in 2020.*/
 INSERT INTO RATES
 SELECT PULocationID as ZONEID,
