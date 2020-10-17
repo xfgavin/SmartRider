@@ -6,8 +6,8 @@
   vars:
     ansible_python_interpreter: /usr/bin/python3
   tasks:
-#    - name: Pull node exporter image
-#      shell: "docker pull prom/node-exporter"
+    - name: Pull node exporter image
+      shell: "docker pull prom/node-exporter"
 #    - name: Add user to docker group
 #      shell: "usermod -aG docker AWSUSER"
     - name: Create directory for monitoring
@@ -53,8 +53,8 @@
   vars:
     ansible_python_interpreter: /usr/bin/python3
   tasks:
-#    - name: Pull postgres exporter image
-#      shell: "docker pull wrouesnel/postgres_exporter; docker pull grafana/grafana; docker pull prom/prometheus"
+    - name: Pull postgres exporter image
+      shell: "docker pull wrouesnel/postgres_exporter; docker pull grafana/grafana; docker pull prom/prometheus"
     - name: Copy monitoring yml
       copy:
         src: docker-compose_postgis_tmp.yml
