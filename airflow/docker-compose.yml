@@ -1,0 +1,40 @@
+version: "2.1"
+services:
+#  scheduler:
+#    image: apache/airflow
+#    restart: always
+#    depends_on:
+#      - webserver
+#    env_file:
+#      - .env
+#    ports:
+#      - "8793:8793"
+#    volumes:
+#      - ./dags:/opt/airflow/dags
+#      - ./airflow-logs:/opt/airflow/logs
+#    command: scheduler
+#    healthcheck:
+#      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+#      interval: 30s
+#      timeout: 30s
+#      retries: 3
+  webserver:
+    image: apache/airflow
+    hostname: webserver
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./scripts:/opt/airflow/scripts
+      - ./airflow-logs:/opt/airflow/logs
+      - ./id_rsa:/opt/id_rsa
+      - ./known_hosts:/home/airflow/.ssh/known_hosts
+    ports:
+      - "8088:8080"
+    entrypoint: ./scripts/airflow-entrypoint.sh
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+      interval: 30s
+      timeout: 30s
+      retries: 32

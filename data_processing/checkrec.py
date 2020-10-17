@@ -76,7 +76,6 @@ def filtertasklist(tasklist,bucket):
     for key in tasklist:
         prefix = 'trip data/' + key
         objs = list(bucket.objects.filter(Prefix=prefix))
-        print(objs)
         if not any([w.key == key for w in objs]):
             tasklist.remove(key)
     return tasklist
