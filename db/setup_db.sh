@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source ~/.profile
 Usage(){
 [ ${#Error} -gt 0 ] && echo -e "\nError: $Error\n"
 cat <<EOF
@@ -58,7 +59,7 @@ init_airflow(){
 update_rates(){
   docker exec postgis bash -c "PGPASSWORD=$PGPWD psql -d $PGDB -U $PGUSER -h $PGHOST -f /mnt/db/sql/calc_rate.sql"
 }
-while getopts "aiptclm" OPTION
+while getopts "aiptclmu" OPTION
 do
   case $OPTION in
     a)
