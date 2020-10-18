@@ -9,6 +9,10 @@ Ride share market has grown expontionally during past a few years, so does the n
 Here I would like to propose a data driven solution: [SmartRider](https://smartrider.dtrace.net). 
 <img src="https://github.com/xfgavin/SmartRider/blob/master/images/snapshot.png?raw=true">
 
-It is based on historical taxi trip data. Users can pick a location on the map, then adjust parameters like 
+It is based on historical taxi trip data. Users can pick a location on the map, then adjust parameters like trip month, traffic situation, and social restrictions such as COVID.
 
-used New York city taxi trip data and 
+Under the hood, I used New York city taxi trip data (yellow & green taxis only) and a Spark centered pipeline.
+
+# The data
+
+<img src="https://www1.nyc.gov/assets/tlc/images/content/pages/home/nyc-tlc-logo.png">
