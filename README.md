@@ -37,6 +37,22 @@ Software packages/Tools used in this project
 5. Dash leaflet, ver: 0.1.4
 <img src="http://dash-leaflet.herokuapp.com/assets/leaflet.png" width="200px">
 
+### Engineering chanllenges
+1. how to efficiently convert geo location to taxi zone id. Data before 2017 has pickup geo locations (point) with longitude and latitude, but data since 2017 only has pickup taxi zone id (area). To do the conversion, PostGIS is used because it has lots of geo related functions. Here are two options to do the conversion:
+  1. convert during Spark ETL
+  2. create a stored procedure in Postgres and convert inside database after Spark ETL
+Option 1 took too long, for a csv with 10M rows, it could take at least 2 days and even longer.
+Option 2 stood out by taking only less than half an hour.
+
+2. data clean up. Data is always messy. In this dataset, there are some major issues:
+  1. super short trip: elasped only couple of seconds, less than 0.5mile etc.
+  2. less than minimal fare charges
+  3. timestamps happens in future
+  4. missing value
+  5. no riders
+  6. abnormal driving speed, either less than 5mph or higher than 100mph
+  7. extreemly high rate
+
 ### Set up
 Ansible and docker are used to setup spark cluster in Amazon AWS for this project. Please check [/setup/playbook](/setup/playbook)
 
