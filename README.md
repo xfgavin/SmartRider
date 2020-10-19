@@ -1,5 +1,4 @@
-### SmartRider
-<img src="https://github.com/xfgavin/SmartRider/blob/master/images/rainbowbar.png?raw=true" width="100%">
+<img src="https://github.com/xfgavin/SmartRider/blob/master/images/rainbowbar_title.png?raw=true" width="100%">
 Ride smarter, for less!
 <img src="https://github.com/xfgavin/SmartRider/blob/master/images/icons.png?raw=true">
 
