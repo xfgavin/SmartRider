@@ -1,5 +1,4 @@
-# 
-# SmartRider
+### SmartRider
 <img src="https://github.com/xfgavin/SmartRider/blob/master/images/rainbowbar.png?raw=true" width="100%">
 Ride smarter, for less!
 <img src="https://github.com/xfgavin/SmartRider/blob/master/images/icons.png?raw=true">
@@ -17,6 +16,7 @@ Under the hood, I used New York city taxi trip data (yellow & green taxis only) 
 ### The dataset
 [New York city taxi trip data](https://registry.opendata.aws/nyc-tlc-trip-records-pds/).
 This dataset has:
+
 1. taxi trip from 2009 to present,
 2. includes either pickup/dropoff geo location or [taxi zone id](https://s3.amazonaws.com/nyc-tlc/misc/taxi_zones.zip).
 3. file size: ~240GB
@@ -26,6 +26,7 @@ This dataset has:
 <img src="https://github.com/xfgavin/SmartRider/blob/master/images/techstack.png?raw=true">
 This pipeline gets data from S3, ETLs data using a Spark cluster and saves data to PostgreSQL database with PostGIS extension. Finally, Dash from plotly is used to provide web service. Airflow is used to schedule data processing jobs when new data file exists.
 Software packages/Tools used in this project
+
 1. Apache Spark, ver: 3.0.1
 <img src="https://spark.apache.org/images/spark-logo-trademark.png" width="200px">
 2. Apache Airflow, ver: 1.10.12
