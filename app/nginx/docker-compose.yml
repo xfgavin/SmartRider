@@ -1,0 +1,14 @@
+version: '2.1'
+services:
+  nginx-proxy:
+    hostname: nginx
+    domainname: dtrace.net
+    image: nginx:alpine
+    volumes:
+      - ./cert/fullchain.cer:/etc/nginx/fullchain.cer
+      - ./cert/dtrace.net.key:/etc/nginx/dtrace.net.key
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - '80:80'
+      - '443:443'
+    restart: always
