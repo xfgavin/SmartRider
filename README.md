@@ -28,15 +28,15 @@ This pipeline gets data from S3, ETLs data using a Spark cluster and saves data 
 Software packages/Tools used in this project
 
 1. Apache Spark, ver: 3.0.1
-<img src="https://spark.apache.org/images/spark-logo-trademark.png" height="100px">
+<img src="https://spark.apache.org/images/spark-logo-trademark.png" height="50px">
 2. Apache Airflow, ver: 1.10.12
-<img src="https://airflow.apache.org/images/feature-image.png" height="100px">
+<img src="https://airflow.apache.org/images/feature-image.png" height="50px">
 3. PostGreSQL with PostGIS extension, ver: 12.4
-<img src="https://postgis.net/images/postgis-logo.png" height="100px">
+<img src="https://postgis.net/images/postgis-logo.png" height="50px">
 4. Plotly Dash, ver: 1.16.2
-<img src="https://www.educative.io/api/edpresso/shot/6166549980250112/image/5979145793175552" height="100px">
+<img src="https://www.educative.io/api/edpresso/shot/6166549980250112/image/5979145793175552" height="50px">
 5. Dash leaflet, ver: 0.1.4
-<img src="http://dash-leaflet.herokuapp.com/assets/leaflet.png" height="100px">
+<img src="http://dash-leaflet.herokuapp.com/assets/leaflet.png" height="50px">
 
 ### Engineering chanllenges
 1. How to efficiently convert geo location to taxi zone id. Data before 2017 has pickup geo locations (point) with longitude and latitude, but data since 2017 only has pickup taxi zone id (area). To do the conversion, PostGIS is used because it has lots of geo related functions. Here are two options to do the conversion:
