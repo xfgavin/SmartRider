@@ -15,11 +15,10 @@ It is based on historical taxi trip data. Users can pick a location on the map, 
 Under the hood, I used New York city taxi trip data (yellow & green taxis only) and a Spark centered pipeline.
 
 ### The dataset
-<img src="https://www1.nyc.gov/assets/tlc/images/content/pages/home/nyc-tlc-logo.png" width="200px">
 [New York city taxi trip data](https://registry.opendata.aws/nyc-tlc-trip-records-pds/).
 This dataset has:
 1. taxi trip from 2009 to present,
-2. includes either pickup/dropoff geo location or [taxi zone id]https://s3.amazonaws.com/nyc-tlc/misc/taxi_zones.zip.
+2. includes either pickup/dropoff geo location or [taxi zone id](https://s3.amazonaws.com/nyc-tlc/misc/taxi_zones.zip).
 3. file size: ~240GB
 4. nearly updates monthly.
 
