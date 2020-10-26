@@ -9,6 +9,7 @@ BEGIN
 	LOOP
 		FETCH CUR INTO REC;
 		EXIT WHEN NOT FOUND;
+		RAISE NOTICE 'WORKING ON RECORD: %',REC.ID;
         INSERT INTO TRIPDATA(pickup_datetime,
 	dropoff_datetime,
 	PULocationID,
