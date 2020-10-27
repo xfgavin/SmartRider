@@ -36,6 +36,7 @@ do
 done
 
 [ ${#inputfile} -eq 0 ] && Usage
+echo "Importing $inputfile"
 spark-submit --driver-class-path /opt/spark/jars/postgresql-42.2.16.jar \
              --jars /opt/spark/jars/postgresql-42.2.16.jar \
              --packages com.amazonaws:aws-java-sdk-bundle:1.11.876,org.apache.hadoop:hadoop-aws:3.2.0 \

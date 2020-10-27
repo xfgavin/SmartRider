@@ -28,8 +28,8 @@ def main():
     tasklist = filtertasklist(tasklist,s3)
     
     #Execute shell script to submit spark jobs
-    print(tasklist)
     for task in tasklist:
+        print('Importing: ' + task)
         os.system(os.getcwd()+'/submitjob_airflow.sh -i ' + task)
         
 def getdata(sql,conn):
