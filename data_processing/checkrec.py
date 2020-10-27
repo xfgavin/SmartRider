@@ -4,7 +4,8 @@ import sys
 import os
 from datetime import datetime as dt
 import boto3
-from botocore.handlers import disable_signing
+from botocore import UNSIGNED
+from botocore.config import Config
 
 def main():
     #This function will:
@@ -21,14 +22,13 @@ def main():
     closeDB(conn)
     
     #Create S3 client with no signing
-    s3 = boto3.resource('s3')
-    s3.meta.client.meta.events.register('choose-signer.s3.*', disable_signing)
-    bucket = s3.Bucket('nyc-tlc')
+    s3 = boto3.client('s3', config=Config(signature_version=UNSIGNED))
     
     #Validate existence on S3
-    tasklist = filtertasklist(tasklist,bucket)
+    tasklist = filtertasklist(tasklist,s3)
     
     #Execute shell script to submit spark jobs
+    print(tasklist)
     for task in tasklist:
         os.system(os.getcwd()+'/submitjob_airflow.sh -i ' + task)
         
@@ -52,7 +52,11 @@ def gen_tasklist(isYellow,conn):
         keyword = 'green'
         year_start=2013
         
-    mysql = "select filename from tripdata_filename where filename like '" + keyword + "%' order by filename"
+    #islocked:
+    #0: no data imported
+    #1: completeness not checked
+    #2: good
+    mysql = "select filename from tripdata_filename where filename like '" + keyword + "%' and islocked=2 order by filename"
     rec = getdata(mysql,conn)
     return [keyword + '_tripdata_' + str(year) + '-' + f'{month:02}' + '.csv' for year in range(year_start,dt.now().year+1) for month in range(1,13) if year != dt.now().year or month<=dt.now().month if keyword + '_tripdata_' + str(year) + '-' + f'{month:02}' + '.csv' not in rec]
 
@@ -72,13 +76,21 @@ def closeDB(conn):
     conn.close()
     
     
-def filtertasklist(tasklist,bucket):
+def filtertasklist(tasklist,s3obj):
+    newtasklist = tasklist.copy()
     for key in tasklist:
-        prefix = 'trip data/' + key
-        objs = list(bucket.objects.filter(Prefix=prefix))
-        if not any([w.key == key for w in objs]):
-            tasklist.remove(key)
-    return tasklist
+        keyexist = 0
+        prefix = 'trip data/' +key
+        response = s3obj.list_objects_v2(
+                Bucket='nyc-tlc',
+                Prefix=prefix,
+        )
+        for obj in response.get('Contents', []):
+            if obj['Key'] == prefix:
+                keyexist = 1
+        if keyexist == 0:
+            newtasklist.remove(key)
+    return newtasklist
     
 if __name__ == '__main__':
     main()
