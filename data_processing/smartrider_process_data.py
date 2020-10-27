@@ -34,6 +34,22 @@ def removeLastColumnSpecialChar(df):
     if len(lastcol_list)>1:
         df = df.withColumnRenamed(lastcol, lastcol_list[0])
     return df
+def removeColumnSpecialChar(df):
+    #########################
+    #To remove special characters from last column.
+    #Usually, only last column has special characters, might be due to editing under windows.
+    #It's usually again last character.
+    for col in df.schema.names:
+        col_list=re.split(r'(\W+)',col)
+        if len(col_list)>1:
+            maxlen = 0
+            realcol = []
+            for item in col_list:
+                if len(item)>maxlen:
+                    maxlen = len(item)
+                    realcol = item
+            df = df.withColumnRenamed(col, realcol)
+    return df
 
 def setisweekend(myday):
     if myday>1 and myday<7:
@@ -58,8 +74,8 @@ def read_clean_csv(s3file):
     #  4. convert geo location to taxi zone id.
     setisweekend_udf = udf(setisweekend)
     settraffic_udf = udf(settraffic)
-    raw_df = spark.read.csv(s3file, header = True, inferSchema=True, multiLine=True, escape='"')
-    raw_df = removeLastColumnSpecialChar(raw_df)
+    raw_df = spark.read.csv(s3file, header = True, inferSchema=True, multiLine=True, escape='"')        
+    raw_df = removeColumnSpecialChar(raw_df)
     raw_df = raw_df.withColumnRenamed("Trip_Pickup_DateTime", "pickup_datetime") \
                    .withColumnRenamed("tpep_pickup_datetime", "pickup_datetime") \
                    .withColumnRenamed("lpep_pickup_datetime", "pickup_datetime") \
