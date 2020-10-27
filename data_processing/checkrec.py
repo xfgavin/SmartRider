@@ -30,7 +30,7 @@ def main():
     #Execute shell script to submit spark jobs
     for task in tasklist:
         print('Importing: ' + task)
-        os.system(os.getcwd()+'/submitjob_airflow.sh -i ' + task)
+        os.system(os.getcwd()+'/submitjob_single.sh -i ' + task)
         
 def getdata(sql,conn):
     cur = conn.cursor()
