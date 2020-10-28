@@ -49,7 +49,7 @@ Software packages/Tools used in this project
 ### <a name="Highlights">Highlights</a>
 * <a name="Dataconversion">Efficient way in geo location conversion.</a> Data before 2017 has pickup geo locations (point) with longitude and latitude, but data since 2017 only has pickup taxi zone id (area). To do the conversion, PostGIS is used because it has lots of geo related functions. Here are two options to do the conversion:
    1. convert during Spark ETL, query DB for each geo pair.
-   1. create a stored procedure in Postgres and convert inside database after Spark ETL
+   2. create a stored procedure in Postgres and convert inside database after Spark ETL
    For a 15M rows of csv:
    
    Option 1 took >2days.
@@ -58,7 +58,7 @@ Software packages/Tools used in this project
 
 * <a name="Datacheck">Data completeness check.</a> During Spark ETL, some job failed because of various reasons (bad format, job stuck in queue too long, etc.). So data completeness check is necessary to make sure all data is imported completely. The criteria used to consider a csv was imported completely is the tripdata has >1000 records for the csv. Here are two approaches:
    1. Loop all records in csv filename table and count(id) in tripdata.
-   1. For data in tripdata table, count 10K rows by 10K rows, and label a csv was completely imported if it has at least 1000 records in a given 10K row. Afterwards, use approach #1 to check unlabeled csv files.
+   2. For data in tripdata table, count 10K rows by 10K rows, and label a csv was completely imported if it has at least 1000 records in a given 10K row. Afterwards, use approach #1 to check unlabeled csv files.
    
    Approach #1 took 47hrs to finish (1.4B rows in tripdata)
    Approach #2 took 2hrs to check all the 1.4B rows in tripdata and labeled 200 good csvs, then Approach #1 was used to check unlabeled csv (35 total), which took another 7hrs. In total, approach #2 used 9 hrs.
