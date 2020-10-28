@@ -35,33 +35,32 @@ This dataset has:
 This pipeline gets data from S3, ETLs data using a Spark cluster and saves data to PostgreSQL database with PostGIS extension. Finally, Dash from plotly is used to provide web service. Airflow is used to schedule data processing jobs when new data file exists.
 Software packages/Tools used in this project
 
-* Apache Spark, ver: 3.0.1
-<img src="https://spark.apache.org/images/spark-logo-trademark.png" height="50px">
-* Apache Airflow, ver: 1.10.12
-<img src="https://airflow.apache.org/images/feature-image.png" height="50px">
-* PostGreSQL with PostGIS extension, ver: 12.4
-<img src="https://postgis.net/images/postgis-logo.png" height="50px">
-* Plotly Dash, ver: 1.16.2
-<img src="https://www.educative.io/api/edpresso/shot/6166549980250112/image/5979145793175552" height="50px">
-* Dash leaflet, ver: 0.1.4
-<img src="http://dash-leaflet.herokuapp.com/assets/leaflet.png" height="50px">
+* Apache Spark, ver: 3.0.1<img src="https://spark.apache.org/images/spark-logo-trademark.png" height="50px">
+* Apache Airflow, ver: 1.10.12<img src="https://airflow.apache.org/images/feature-image.png" height="50px">
+* PostGreSQL with PostGIS extension, ver: 12.4<img src="https://postgis.net/images/postgis-logo.png" height="50px">
+* Plotly Dash, ver: 1.16.2<img src="https://www.educative.io/api/edpresso/shot/6166549980250112/image/5979145793175552" height="50px">
+* Dash leaflet, ver: 0.1.4<img src="http://dash-leaflet.herokuapp.com/assets/leaflet.png" height="50px">
 
 ### <a name="Highlights">Highlights</a>
 * <a name="Dataconversion">Efficient way in geo location conversion.</a> Data before 2017 has pickup geo locations (point) with longitude and latitude, but data since 2017 only has pickup taxi zone id (area). To do the conversion, PostGIS is used because it has lots of geo related functions. Here are two options to do the conversion:
    1. convert during Spark ETL, query DB for each geo pair.
-   2. create a stored procedure in Postgres and convert inside database after Spark ETL
+   1. create a stored procedure in Postgres and convert inside database after Spark ETL
    For a 15M rows of csv:
    
-   Option 1 took >2days.
-   Option 2 18min (ETL) + 1.1ms per record * 15M ~=5hr.
-   So Option 2 is about 100 times faster. This is because Option 1 has to deal with Spark JDBC, TCP connection, and network transportation for each pair of geo data.
+   Option #1 took >2days.
+   
+   Option #2 18min (ETL) + 1.1ms per record * 15M ~=5hr.
+   
+   So Option #2 is about 100 times faster. This is because Option #1 has to deal with Spark JDBC, TCP connection, and network transportation for each pair of geo data.
 
 * <a name="Datacheck">Data completeness check.</a> During Spark ETL, some job failed because of various reasons (bad format, job stuck in queue too long, etc.). So data completeness check is necessary to make sure all data is imported completely. The criteria used to consider a csv was imported completely is the tripdata has >1000 records for the csv. Here are two approaches:
    1. Loop all records in csv filename table and count(id) in tripdata.
-   2. For data in tripdata table, count 10K rows by 10K rows, and label a csv was completely imported if it has at least 1000 records in a given 10K row. Afterwards, use approach #1 to check unlabeled csv files.
+   1. For data in tripdata table, count 10K rows by 10K rows, and label a csv was completely imported if it has at least 1000 records in a given 10K row. Afterwards, use approach #1 to check unlabeled csv files.
    
    Approach #1 took 47hrs to finish (1.4B rows in tripdata)
+   
    Approach #2 took 2hrs to check all the 1.4B rows in tripdata and labeled 200 good csvs, then Approach #1 was used to check unlabeled csv (35 total), which took another 7hrs. In total, approach #2 used 9 hrs.
+   
    So Approach #2 is about 5 times faster than approach #1.
 
 ### <a name="Setup">Set up</a>
@@ -71,3 +70,12 @@ Please also find scripts for database setup in [/db](/db)
 
 
 ### <a name="Futuredirections">Future Directions</a>
+* Data enrichment
+  * add data from other providers, such as uber, lyft etc.
+  * add data from other cities
+  * increase granularities when setting search parameters
+* Database Optimization: because tripdata is computational intensive(geo conversion, rates calculation, etc.), it could negatively affect user experience.
+  * Dedicated tripdata database server
+  * Dedicated rates database server
+* Database server file system optimization: Since Postgres saves smaller files on disk(~1G), file system such as xfs might be more efficient, ext4 is used in this project though.
+  * ext4 vs xfs
