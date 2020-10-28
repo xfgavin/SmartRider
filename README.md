@@ -4,17 +4,12 @@ Ride smarter, for less!
 
 Ride share market has grown expontionally during past a few years, so does the need for a ride share planning platform. When you plan a trip, you can conveniently refer to Google Flight search, and get better idea of when and where to start the trip. Unfortunately, there is no such a system for rideshare planning yet.
 ## Table of Contents
-[Solution](#Solution)
-
-[The Dataset](#Dataset)
-
-[Tech Stack](#Techstack)
-
-[Highlights](#Highlights)
-
-[Set Up](#Setup)
-
-[Future Directions](#Futuredirections)
+* [Solution](#Solution)
+* [The Dataset](#Dataset)
+* [Tech Stack](#Techstack)
+* [Highlights](#Highlights)
+* [Set Up](#Setup)
+* [Future Directions](#Futuredirections)
 
 ### <a name="Solution">Solution</a>
 Here I would like to propose a data driven solution: [SmartRider](https://smartrider.dtrace.net). 
