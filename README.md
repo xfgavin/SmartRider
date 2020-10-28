@@ -48,7 +48,6 @@ Software packages/Tools used in this project
    Option #1 took >2days.
    
    Option #2 18min (ETL) + 1.1ms per record * 15M ~=5hr.
-   - ![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) `#f03c15`
    So Option #2 is about 100 times faster. This is because Option #1 has to deal with Spark JDBC, TCP connection, network transportation, and database query for each pair of geo data while Option #2 only need to deal with database query.
 
 * <a name="Datacheck">Data completeness check.</a> During Spark ETL, some job failed because of various reasons (bad format, job stuck in queue too long, etc.). So data completeness check is necessary to make sure all data is imported completely. The criteria used to consider a csv was imported completely is the tripdata has >1000 records for the csv. Here are two approaches:
