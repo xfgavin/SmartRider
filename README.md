@@ -4,8 +4,14 @@ Ride smarter, for less!
 
 Ride share market has grown expontionally during past a few years, so does the need for a ride share planning platform. When you plan a trip, you can conveniently refer to Google Flight search, and get better idea of when and where to start the trip. Unfortunately, there is no such a system for rideshare planning yet.
 ## Table of Contents
+[Solution](#Solution)
+[The Dataset](#Dataset)
+[Tech Stack](#Techstack)
+[Highlights](#Highlights)
+[Set Up](#Setup)
+[Future Direction](#Futuredirection)
 
-### Solution
+### <a name="Solution">Solution</a>
 Here I would like to propose a data driven solution: [SmartRider](https://smartrider.dtrace.net). 
 <img src="https://github.com/xfgavin/SmartRider/blob/master/images/snapshot.png?raw=true">
 
@@ -13,7 +19,7 @@ It is based on historical taxi trip data. Users can pick a location on the map, 
 
 Under the hood, I used New York city taxi trip data (yellow & green taxis only) and a Spark centered pipeline.
 
-### The dataset
+### <a name="Dataset">The dataset</a>
 [New York city taxi trip data](https://registry.opendata.aws/nyc-tlc-trip-records-pds/).
 This dataset has:
 
@@ -22,7 +28,7 @@ This dataset has:
 3. file size: ~240GB
 4. nearly updates monthly.
 
-### The tech stack
+### <a name="Techstack">Tech stack</a>
 <img src="https://github.com/xfgavin/SmartRider/blob/master/images/techstack.png?raw=true">
 This pipeline gets data from S3, ETLs data using a Spark cluster and saves data to PostgreSQL database with PostGIS extension. Finally, Dash from plotly is used to provide web service. Airflow is used to schedule data processing jobs when new data file exists.
 Software packages/Tools used in this project
@@ -38,7 +44,7 @@ Software packages/Tools used in this project
 5. Dash leaflet, ver: 0.1.4
 <img src="http://dash-leaflet.herokuapp.com/assets/leaflet.png" height="50px">
 
-### Engineering chanllenges
+### <a name="Highlights">Highlights</a>
 1. How to efficiently convert geo location to taxi zone id. Data before 2017 has pickup geo locations (point) with longitude and latitude, but data since 2017 only has pickup taxi zone id (area). To do the conversion, PostGIS is used because it has lots of geo related functions. Here are two options to do the conversion:
   1. convert during Spark ETL
   2. create a stored procedure in Postgres and convert inside database after Spark ETL
@@ -54,7 +60,7 @@ Option 2 stood out by taking only less than half an hour.
   6. abnormal driving speed, either less than 5mph or higher than 100mph
   7. extreemly high rate
 
-### Set up
+### <a name="Setup">Set up</a>
 Ansible and docker are used to setup spark cluster in Amazon AWS for this project. Please check [/setup/playbook](/setup/playbook)
 
 Please also find scripts for database setup in [/db](/db)
