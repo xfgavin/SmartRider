@@ -19,16 +19,14 @@ Here I would like to propose a data driven solution: [SmartRider](https://smartr
 
 It is based on historical taxi trip data. Users can pick a location on the map, then adjust parameters like trip month, traffic situation, and social restrictions such as COVID.
 
-Under the hood, I used New York city taxi trip data (yellow & green taxis only) and a Spark centered pipeline.
-
 ### <a name="Dataset">The dataset</a>
 [New York city taxi trip data](https://registry.opendata.aws/nyc-tlc-trip-records-pds/).
-This dataset has:
+This dataset (yellow & green taxis only) has:
 
 * taxi trip from 2009 to present,
 * includes either pickup/dropoff geo location or [taxi zone id](https://s3.amazonaws.com/nyc-tlc/misc/taxi_zones.zip).
 * file size: ~240GB
-* nearly updates monthly.
+* updates monthly
 
 ### <a name="Techstack">Tech stack</a>
 <img src="https://github.com/xfgavin/SmartRider/blob/master/images/techstack.png?raw=true">
