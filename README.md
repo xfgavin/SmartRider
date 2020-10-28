@@ -51,6 +51,11 @@ Software packages/Tools used in this project
 
 ### <a name="Highlights">Highlights</a>
 1. How to efficiently convert geo location to taxi zone id. Data before 2017 has pickup geo locations (point) with longitude and latitude, but data since 2017 only has pickup taxi zone id (area). To do the conversion, PostGIS is used because it has lots of geo related functions. Here are two options to do the conversion:
+1. Item 1
+1. Item 2
+1. Item 3
+   1. Item 3a
+   1. Item 3b
   1. convert during Spark ETL
   2. create a stored procedure in Postgres and convert inside database after Spark ETL
 Option 1 took too long, for a csv with 10M rows, it could take at least 2 days and even longer.
