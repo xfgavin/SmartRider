@@ -5,11 +5,16 @@ Ride smarter, for less!
 Ride share market has grown expontionally during past a few years, so does the need for a ride share planning platform. When you plan a trip, you can conveniently refer to Google Flight search, and get better idea of when and where to start the trip. Unfortunately, there is no such a system for rideshare planning yet.
 ## Table of Contents
 [Solution](#Solution)
+
 [The Dataset](#Dataset)
+
 [Tech Stack](#Techstack)
+
 [Highlights](#Highlights)
+
 [Set Up](#Setup)
-[Future Direction](#Futuredirection)
+
+[Future Directions](#Futuredirections)
 
 ### <a name="Solution">Solution</a>
 Here I would like to propose a data driven solution: [SmartRider](https://smartrider.dtrace.net). 
@@ -64,3 +69,6 @@ Option 2 stood out by taking only less than half an hour.
 Ansible and docker are used to setup spark cluster in Amazon AWS for this project. Please check [/setup/playbook](/setup/playbook)
 
 Please also find scripts for database setup in [/db](/db)
+
+
+### <a name="Futuredirections">Future Directions</a>
