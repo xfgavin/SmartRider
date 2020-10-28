@@ -7,6 +7,7 @@ Ride share market has grown expontionally during past a few years, so does the n
 * [Solution](#Solution)
 * [The Dataset](#Dataset)
 * [Tech Stack](#Techstack)
+* [Data Structure](#Datastructure)
 * [Highlights](#Highlights)
    * [Data Conversion](#Dataconversion)
    * [Data Completeness Check](#Datacheck)
@@ -39,6 +40,9 @@ Software packages/Tools used in this project
 * Plotly Dash, ver: 1.16.2<img src="https://www.educative.io/api/edpresso/shot/6166549980250112/image/5979145793175552" height="40px">
 * Dash leaflet, ver: 0.1.4<img src="http://dash-leaflet.herokuapp.com/assets/leaflet.png" height="40px">
 
+### <a name="Datastructure">Data structure</a>
+Farely simple:
+<img src="https://github.com/xfgavin/SmartRider/blob/master/images/db_diag.png?raw=true">
 ### <a name="Highlights">Highlights</a>
 * <a name="Dataconversion">Efficient way in geo location conversion.</a> Data before 2017 has pickup geo locations (point) with longitude and latitude, but data since 2017 only has pickup taxi zone id (area). To do the conversion, PostGIS is used because it has lots of geo related functions. Here are two options to do the conversion:
    1. convert during Spark ETL, query DB for each geo pair.
