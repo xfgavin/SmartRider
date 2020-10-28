@@ -8,6 +8,8 @@ Ride share market has grown expontionally during past a few years, so does the n
 * [The Dataset](#Dataset)
 * [Tech Stack](#Techstack)
 * [Highlights](#Highlights)
+   * [Data Conversion](#Dataconversion)
+   * [Data Completeness Check](#Datacheck)
 * [Set Up](#Setup)
 * [Future Directions](#Futuredirections)
 
@@ -23,29 +25,29 @@ Under the hood, I used New York city taxi trip data (yellow & green taxis only) 
 [New York city taxi trip data](https://registry.opendata.aws/nyc-tlc-trip-records-pds/).
 This dataset has:
 
-1. taxi trip from 2009 to present,
-2. includes either pickup/dropoff geo location or [taxi zone id](https://s3.amazonaws.com/nyc-tlc/misc/taxi_zones.zip).
-3. file size: ~240GB
-4. nearly updates monthly.
+* taxi trip from 2009 to present,
+* includes either pickup/dropoff geo location or [taxi zone id](https://s3.amazonaws.com/nyc-tlc/misc/taxi_zones.zip).
+* file size: ~240GB
+* nearly updates monthly.
 
 ### <a name="Techstack">Tech stack</a>
 <img src="https://github.com/xfgavin/SmartRider/blob/master/images/techstack.png?raw=true">
 This pipeline gets data from S3, ETLs data using a Spark cluster and saves data to PostgreSQL database with PostGIS extension. Finally, Dash from plotly is used to provide web service. Airflow is used to schedule data processing jobs when new data file exists.
 Software packages/Tools used in this project
 
-1. Apache Spark, ver: 3.0.1
+* Apache Spark, ver: 3.0.1
 <img src="https://spark.apache.org/images/spark-logo-trademark.png" height="50px">
-2. Apache Airflow, ver: 1.10.12
+* Apache Airflow, ver: 1.10.12
 <img src="https://airflow.apache.org/images/feature-image.png" height="50px">
-3. PostGreSQL with PostGIS extension, ver: 12.4
+* PostGreSQL with PostGIS extension, ver: 12.4
 <img src="https://postgis.net/images/postgis-logo.png" height="50px">
-4. Plotly Dash, ver: 1.16.2
+* Plotly Dash, ver: 1.16.2
 <img src="https://www.educative.io/api/edpresso/shot/6166549980250112/image/5979145793175552" height="50px">
-5. Dash leaflet, ver: 0.1.4
+* Dash leaflet, ver: 0.1.4
 <img src="http://dash-leaflet.herokuapp.com/assets/leaflet.png" height="50px">
 
 ### <a name="Highlights">Highlights</a>
-1. Efficient way in geo location conversion. Data before 2017 has pickup geo locations (point) with longitude and latitude, but data since 2017 only has pickup taxi zone id (area). To do the conversion, PostGIS is used because it has lots of geo related functions. Here are two options to do the conversion:
+<a name="Dataconversion">1. </a>Efficient way in geo location conversion. Data before 2017 has pickup geo locations (point) with longitude and latitude, but data since 2017 only has pickup taxi zone id (area). To do the conversion, PostGIS is used because it has lots of geo related functions. Here are two options to do the conversion:
    1. convert during Spark ETL, query DB for each geo pair.
    1. create a stored procedure in Postgres and convert inside database after Spark ETL
    For a 15M rows of csv:
@@ -54,7 +56,7 @@ Software packages/Tools used in this project
    Option 2 18min (ETL) + 1.1ms per record * 15M ~=5hr.
    So Option 2 is about 100 times faster. This is because Option 1 has to deal with Spark JDBC, TCP connection, and network transportation for each pair of geo data.
 
-1. Data completeness check. During Spark ETL, some job failed because of various reasons (bad format, job stuck in queue too long, etc.). So data completeness check is necessary to make sure all data is imported completely. The criteria used to consider a csv was imported completely is the tripdata has >1000 records for the csv. Here are two approaches:
+<a name="Datacheck">1. </a>Data completeness check. During Spark ETL, some job failed because of various reasons (bad format, job stuck in queue too long, etc.). So data completeness check is necessary to make sure all data is imported completely. The criteria used to consider a csv was imported completely is the tripdata has >1000 records for the csv. Here are two approaches:
    1. Loop all records in csv filename table and count(id) in tripdata.
    1. For data in tripdata table, count 10K rows by 10K rows, and label a csv was completely imported if it has at least 1000 records in a given 10K row. Afterwards, use approach #1 to check unlabeled csv files.
    
