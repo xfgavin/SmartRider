@@ -33,11 +33,11 @@ This dataset (yellow & green taxis only) has:
 This pipeline gets data from S3, ETLs data using a Spark cluster and saves data to PostgreSQL database with PostGIS extension. Finally, Dash from plotly is used to provide web service. Airflow is used to schedule data processing jobs when new data file exists.
 Software packages/Tools used in this project
 
-* Apache Spark, ver: 3.0.1<img src="https://spark.apache.org/images/spark-logo-trademark.png" height="30px">
-* Apache Airflow, ver: 1.10.12<img src="https://airflow.apache.org/images/feature-image.png" height="30px">
-* PostGreSQL with PostGIS extension, ver: 12.4<img src="https://postgis.net/images/postgis-logo.png" height="30px">
-* Plotly Dash, ver: 1.16.2<img src="https://www.educative.io/api/edpresso/shot/6166549980250112/image/5979145793175552" height="30px">
-* Dash leaflet, ver: 0.1.4<img src="http://dash-leaflet.herokuapp.com/assets/leaflet.png" height="30px">
+* Apache Spark, ver: 3.0.1<img src="https://spark.apache.org/images/spark-logo-trademark.png" height="40px">
+* Apache Airflow, ver: 1.10.12<img src="https://airflow.apache.org/images/feature-image.png" height="40px">
+* PostGreSQL with PostGIS extension, ver: 12.4<img src="https://postgis.net/images/postgis-logo.png" height="40px">
+* Plotly Dash, ver: 1.16.2<img src="https://www.educative.io/api/edpresso/shot/6166549980250112/image/5979145793175552" height="40px">
+* Dash leaflet, ver: 0.1.4<img src="http://dash-leaflet.herokuapp.com/assets/leaflet.png" height="40px">
 
 ### <a name="Highlights">Highlights</a>
 * <a name="Dataconversion">Efficient way in geo location conversion.</a> Data before 2017 has pickup geo locations (point) with longitude and latitude, but data since 2017 only has pickup taxi zone id (area). To do the conversion, PostGIS is used because it has lots of geo related functions. Here are two options to do the conversion:
