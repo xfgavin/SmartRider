@@ -44,6 +44,7 @@ Software packages/Tools used in this project
 Farely simple:
 
 <img src="https://github.com/xfgavin/SmartRider/blob/master/images/db_diag.png?raw=true">
+
 ### <a name="Highlights">Highlights</a>
 * <a name="Dataconversion">Efficient way in geo location conversion.</a> Data before 2017 has pickup geo locations (point) with longitude and latitude, but data since 2017 only has pickup taxi zone id (area). To do the conversion, PostGIS is used because it has lots of geo related functions. Here are two options to do the conversion:
    1. convert during Spark ETL, query DB for each geo pair.
