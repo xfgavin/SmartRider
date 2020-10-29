@@ -11,8 +11,9 @@ Ride share market has grown expontionally during past a few years, so does the n
 * [Highlights](#Highlights)
    * [Data Conversion](#Dataconversion)
    * [Data Completeness Check](#Datacheck)
-* [Set Up](#Setup)
+* [Cluster Configuration](#Setup)
 * [Future Directions](#Futuredirections)
+* [Slides](#Slides)
 
 ### <a name="Solution">Solution</a>
 Here I would like to propose a data driven solution: [SmartRider](https://smartrider.dtrace.net). 
@@ -82,3 +83,6 @@ Please also find scripts for database setup in [/db](/db)
   * Dedicated rates database server
 * Database server file system optimization: Since Postgres saves smaller files on disk(~1G), file system such as xfs might be more efficient, ext4 is used in this project though.
   * ext4 vs xfs
+  
+### <a name="Slides">Slides</a>
+[Google Slides](https://docs.google.com/presentation/d/1TcylCo1eHtIEO8UI1zvEn9nlOYM_JZMWL2prc-WusVQ/edit?usp=sharing)
