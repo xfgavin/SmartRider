@@ -48,18 +48,18 @@ Farely simple:
 
 ### <a name="Highlights">Highlights</a>
 * <a name="Dataconversion">Efficient way in geo location conversion.</a> Data before 2017 has pickup geo locations (point) with longitude and latitude, but data since 2017 only has pickup taxi zone id (area). To do the conversion, PostGIS is used because it has lots of geo related functions. Here are two options to do the conversion:
-   1. convert during Spark ETL, query DB for each geo pair.
-   1. create a stored procedure in Postgres and convert inside database after Spark ETL
+   * #1: convert during Spark ETL, query DB for each geo pair.
+   * #2: create a stored procedure in Postgres and convert inside database after Spark ETL
    For a 15M rows of csv:
    
-   Option #1 took >2days.
+   Option #1 took >2days (ETL job was killed after two days of running).
    
    Option #2 18min (ETL) + 1.1ms per record * 15M ~=5hr.
    So Option #2 is about 100 times faster. This is because Option #1 has to deal with Spark JDBC, TCP connection, network transportation, and database query for each pair of geo data while Option #2 only need to deal with database query.
 
 * <a name="Datacheck">Data completeness check.</a> During Spark ETL, some job failed because of various reasons (bad format, job stuck in queue too long, etc.). So data completeness check is necessary to make sure all data is imported completely. The criteria used to consider a csv was imported completely is the tripdata has >1000 records for the csv. Here are two approaches:
-   1. Loop all records in csv filename table and count(id) in tripdata.
-   1. For data in tripdata table, count 10K rows by 10K rows, and label a csv was completely imported if it has at least 1000 records in a given 10K row. Afterwards, use approach #1 to check unlabeled csv files.
+   * #1: Loop all records in csv filename table and count(id) in tripdata.
+   * #2: For data in tripdata table, count 10K rows by 10K rows, and label a csv was completely imported if it has at least 1000 records in a given 10K row. Afterwards, use approach #1 to check unlabeled csv files.
    
    Approach #1 took 47hrs to finish (1.4B rows in tripdata)
    
