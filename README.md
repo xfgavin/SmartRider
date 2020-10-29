@@ -2,7 +2,7 @@
 Ride smarter, for less!
 <img src="https://github.com/xfgavin/SmartRider/blob/master/images/icons.png?raw=true">
 
-Ride share market has grown expontionally during past a few years, so does the need for a ride share planning platform. When you plan a trip, you can conveniently refer to Google Flight search, and get better idea of when and where to start the trip. Unfortunately, there is no such a system for rideshare planning yet.
+Ride share market has grown exponentially during past a few years, so does the need for a ride share planning platform. When you plan a trip, you can conveniently refer to Google Flight search, and get better idea of when and where to start the trip. Unfortunately, there is no such a system for rideshare planning yet.
 ## Table of Contents
 * [Solution](#Solution)
 * [The Dataset](#Dataset)
