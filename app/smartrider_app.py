@@ -202,7 +202,7 @@ def update_graph(click_lat_lng,departure_month,traffic,covid):
         else:
             mysql_weekday = 'SELECT avg(rate) as rate from rates where target_month = ' + str(departure_month) + ' AND traffic=' + str(traffic) + ' AND iscovid=0 AND isweekend=0 AND zoneid in (SELECT locationid from taxi_zones where ST_intersects(ST_SetSRID( ST_Point(' + str(click_lat_lng[1]) + ', ' + str(click_lat_lng[0]) + '),4326),geom))  group by target_hour order by target_hour;'
             mysql_weekend = 'SELECT avg(rate) as rate from rates where target_month = ' + str(departure_month) + ' AND traffic=' + str(traffic) + ' AND iscovid=0 AND isweekend=1 AND zoneid in (SELECT locationid from taxi_zones where ST_intersects(ST_SetSRID( ST_Point(' + str(click_lat_lng[1]) + ', ' + str(click_lat_lng[0]) + '),4326),geom))  group by target_hour order by target_hour;'
-            mysql_holiday = 'SELECT avg(rate) as rate from rates where target_month = ' + str(departure_month) + ' AND traffic=' + str(traffic) + ' AND iscovid=0 AND isholiday=1 AND zoneid in (SELECT locationid from taxi_zones where ST_intersects(ST_SetSRID( ST_Point(' + str(click_lat_lng[1]) + ', ' + str(click_lat_lng[0]) + '),4326),geom))  group by target_hour order by target_hour;'
+            mysql_holiday = 'SELECT avg(rate) as rate from rates where traffic=' + str(traffic) + ' AND iscovid=0 AND isholiday=1 AND zoneid in (SELECT locationid from taxi_zones where ST_intersects(ST_SetSRID( ST_Point(' + str(click_lat_lng[1]) + ', ' + str(click_lat_lng[0]) + '),4326),geom))  group by target_hour order by target_hour;'
             month_slider_disabled = False
         #####################
         #Grab data
