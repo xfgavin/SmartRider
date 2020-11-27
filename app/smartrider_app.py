@@ -271,8 +271,6 @@ def getdata(sql):
 if __name__ == '__main__':
     myloc = None
     try:
-        print(os.environ['PGHOST'])
-        print(os.environ['PGPWD'])
         conn = psycopg2.connect(
                host=os.environ['PGHOST'],
                database=os.environ['PGDB'],
