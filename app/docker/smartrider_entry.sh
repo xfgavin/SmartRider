@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-[ -z "${PGPWD}" ] && PGPWD=smartrider
-[ -z "${PGDB}" ] && PGDB=smartrider
-[ -z "${PGUSER}" ] && PGUSER=smartrider
-[ -z "${PGHOST}" ] && PGHOST=localhost
+[ -z "${PGPWD}" ] && export PGPWD=smartrider
+[ -z "${PGDB}" ] && export PGDB=smartrider
+[ -z "${PGUSER}" ] && export PGUSER=smartrider
+[ -z "${PGHOST}" ] && export PGHOST=localhost
 echo $PGHOST
 SCRIPTROOT=$( cd $(dirname $0) ; pwd)
 $SCRIPTROOT/smartrider_app.py

@@ -13,5 +13,5 @@ RUN /tmp/installer.sh
 EXPOSE 8080
 
 #CMD [ "/usr/src/app/smartrider_app.py" ]
-CMD [ "/usr/src/app/smartrider_entry.py" ]
+CMD [ "/usr/src/app/smartrider_entry.sh ]
 ENV DEBIAN_FRONTEND teletype
