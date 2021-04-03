@@ -71,7 +71,6 @@ def read_clean_csv(s3file):
     #  1. load raw NYC taxi trip data from S3
     #  2. unify column names
     #  3. clean up
-    #  4. convert geo location to taxi zone id.
     setisweekend_udf = udf(setisweekend)
     settraffic_udf = udf(settraffic)
     raw_df = spark.read.csv(s3file, header = True, inferSchema=True, multiLine=True, escape='"')        
@@ -104,7 +103,7 @@ def read_clean_csv(s3file):
     raw_df = raw_df.filter("passenger_count >0")
     raw_df = raw_df.filter("trip_distance >0.5")
     raw_df = raw_df.filter("tip_amount >=0")
-    raw_df = raw_df.filter("total_amount >=2.5")
+    raw_df = raw_df.filter("total_amount >=2.5") #NYC taxi minimal charge
     
     raw_df = raw_df.withColumn('fare_amount', col('total_amount')-col('tip_amount')) \
                    .withColumn('pickup_date',to_date(col('pickup_datetime'))) \
@@ -193,6 +192,8 @@ def process_tripdata(raw_df, sourceid):
 
 def geo2taxizoneid(lat,lng):
     #Get taxi zone id based on given latitude and longitude.
+    ######
+    #outdated, used stored procedure in postgis instead.
     mysql = "SELECT tz.locationid FROM taxi_zones tz WHERE st_within(ST_SetSRID( ST_Point( "+str(lng)+","+str(lat)+"), 4326),tz.geom ) LIMIT 1"
     zoneid = spark.read \
         .format("jdbc") \
@@ -221,6 +222,9 @@ def save2db(df,table):
         .save()
     
 def getSourceID(s3file,table):
+    #############
+    #Register input filename for reference in trip_data table
+    #############
     input_filename = os.path.basename(s3file).lower()
     rec = Row("filename")
     rec = rec(input_filename)
@@ -270,6 +274,9 @@ if __name__ == '__main__':
             .builder\
             .appName("smartrider")\
             .getOrCreate()
+    ##############
+    #Register filename into database to make sure same file won't be processed multiple times.
+    ##############
     sourceid = getSourceID(s3file,'tripdata_filename')
     if sourceid==-1:
         print('Error when retrieving sourceid')
