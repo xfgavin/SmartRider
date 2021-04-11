@@ -4,17 +4,19 @@ from pyspark import SparkContext
 from pyspark import SparkConf
 from pyspark.sql.types import *
 from pyspark.sql.functions import *
-from pyspark.sql import SQLContext, Row
 import sys
 import os
 import holidays
 import re
+from datetime import date
 
 def main(s3file, sourceid):
-    #This function will:
-    # 1. Load data from s3
-    # 2. Give raw data a good masssage
-    # 3. save to database
+    '''
+    This function will:
+     1. Load data from s3
+     2. Give raw data a good masssage
+     3. save to database
+    '''
     #s3file='yellow_tripdata_2020-04.csv'
     raw_df = read_clean_csv(s3file)
     tripdata_df = process_tripdata(raw_df,sourceid)
@@ -24,21 +26,36 @@ def main(s3file, sourceid):
     else:
         save2db(tripdata_df,'tripdata')
     
+def create_holiday_df:
+    '''
+    Create a holiday dataframe containing holidays ranging from 2008 to current year +1
+    Since this dataframe is small, broadcast join will be used to join with raw_df
+    '''
+    data = []
+    schema = ['holiday_year','holiday_month','holiday_day','isholiday']
+    for thisyear in range(2008,date.today().year+2):
+        for holiday_date, holiday_name in sorted(holidays.US(state='NY', years=thisyear).items()):
+            thisholiday = list(map(int, str(holiday_date).split('-')))
+            data.append((thisholiday[0],thisholiday[1],thisholiday[2],1))
+    holiday_df = spark.createDataFrame(data).toDF(*schema)
+    return holiday_df
 def removeLastColumnSpecialChar(df):
-    #########################
-    #To remove special characters from last column.
-    #Usually, only last column has special characters, might be due to editing under windows.
-    #It's usually again last character.
+    '''
+    To remove special characters from last column.
+    Usually, only last column has special characters, might be due to editing under windows.
+    It's usually again last character.
+    '''
     lastcol=df.schema.names[-1]
     lastcol_list=re.split(r'(\W+)',lastcol)
     if len(lastcol_list)>1:
         df = df.withColumnRenamed(lastcol, lastcol_list[0])
     return df
 def removeColumnSpecialChar(df):
-    #########################
-    #To remove special characters from last column.
-    #Usually, only last column has special characters, might be due to editing under windows.
-    #It's usually again last character.
+    '''
+    To remove special characters from last column.
+    Usually, only last column has special characters, might be due to editing under windows.
+    It's usually again last character.
+    '''
     for col in df.schema.names:
         col_list=re.split(r'(\W+)',col)
         if len(col_list)>1:
@@ -51,29 +68,19 @@ def removeColumnSpecialChar(df):
             df = df.withColumnRenamed(col, realcol)
     return df
 
-def setisweekend(myday):
-    if myday>1 and myday<7:
-        return 0
-    else:
-        return 1
-
-def settraffic(speed):
-    #calc speed and assign traffic condition, >25=1; 10-25=2; <10=3
-    if speed>25:
-        return 1
-    elif speed <10:
-        return 3
-    else:
-        return 2
-
 def read_clean_csv(s3file):
-    #This function will:
-    #  1. load raw NYC taxi trip data from S3
-    #  2. unify column names
-    #  3. clean up
-    setisweekend_udf = udf(setisweekend)
-    settraffic_udf = udf(settraffic)
-    raw_df = spark.read.csv(s3file, header = True, inferSchema=True, multiLine=True, escape='"')        
+    '''
+    This function will:
+      1. load raw NYC taxi trip data from S3
+      2. unify column names
+      3. clean up
+    '''
+    ##############
+    #Removed udf and use sql instead
+    ##############
+    #setisweekend_udf = udf(setisweekend)
+    #settraffic_udf = udf(settraffic)
+    raw_df = spark.read.csv(s3file, header=True, inferSchema=True, multiLine=True, escape='"')        
     raw_df = removeColumnSpecialChar(raw_df)
     raw_df = raw_df.withColumnRenamed("Trip_Pickup_DateTime", "pickup_datetime") \
                    .withColumnRenamed("tpep_pickup_datetime", "pickup_datetime") \
@@ -98,41 +105,53 @@ def read_clean_csv(s3file):
                    .withColumnRenamed("Pickup_longitude", "pickup_longitude") \
                    .withColumnRenamed("Dropoff_latitude", "dropoff_latitude") \
                    .withColumnRenamed("Dropoff_longitude", "dropoff_longitude")
+    #Clean up: PULocationID is not null, passenger_count >0, trip_distance>0, total_amount>0
     raw_df = raw_df.filter("pickup_datetime != ''")
     raw_df = raw_df.filter("dropoff_datetime != ''")
     raw_df = raw_df.filter("passenger_count >0")
     raw_df = raw_df.filter("trip_distance >0.5")
     raw_df = raw_df.filter("tip_amount >=0")
     raw_df = raw_df.filter("total_amount >=2.5") #NYC taxi minimal charge
-    
-    raw_df = raw_df.withColumn('fare_amount', col('total_amount')-col('tip_amount')) \
-                   .withColumn('pickup_date',to_date(col('pickup_datetime'))) \
-                   .withColumn('pickup_datetime',to_timestamp(col('pickup_datetime'))) \
-                   .withColumn('dropoff_datetime', to_timestamp(col('dropoff_datetime')))
-    
-    raw_df = raw_df.withColumn('rate', round(col('fare_amount')/col('trip_distance'),2)) \
-                   .withColumn('duration',round((col('dropoff_datetime').cast(LongType()) - col('pickup_datetime').cast(LongType()))/3600,2)) \
-                   .withColumn('pickup_year', year(col('pickup_datetime'))) \
-                   .withColumn('pickup_month', month(col('pickup_datetime'))) \
-                   .withColumn('pickup_day', dayofmonth(col('pickup_datetime'))) \
-                   .withColumn('pickup_hour', hour(col('pickup_datetime'))) \
-                   .withColumn('isweekend', setisweekend_udf(dayofweek(col('pickup_datetime'))).cast(IntegerType()))
-    raw_df = raw_df.withColumn('speed', round(col('trip_distance')/col('duration'),2)) \
-                   .withColumn('traffic', settraffic_udf(col('speed')).cast(IntegerType()))
-    
-    raw_df = raw_df.filter("rate <50")
-    raw_df = raw_df.filter("duration >0.1")
-    raw_df = raw_df.filter("speed >5")
-    raw_df = raw_df.filter("speed <100")
-    
-    
-    #New york city has a speed limit as 25mph, but just in case
-    #Cleaning up data with invalid values for a given column.
     #minimal fare is based on https://www1.nyc.gov/site/tlc/passengers/taxi-fare.page
-    #Clean up: PULocationID is not null, passenger_count >0, trip_distance>0, total_amount>0
+    
+    raw_df = raw_df.select(
+        '*',
+        (col('total_amount')-col('tip_amount')).alias('fare_amount'),
+        to_date(col('pickup_datetime')).alias('pickup_date'),
+        to_timestamp(col('pickup_datetime')).alias('pickup_datetime'),
+        to_timestamp(col('dropoff_datetime')).alias('dropoff_datetime')
+    )
+    raw_df = raw_df.select(
+        '*',
+        round(col('fare_amount')/col('trip_distance'),2).alias('rate'),
+        round((col('dropoff_datetime').cast(LongType()) - col('pickup_datetime').cast(LongType()))/3600,2).alias('duration'),
+        year(col('pickup_datetime')).alias('pickup_year'),
+        month(col('pickup_datetime')).alias('pickup_month'),
+        dayofmonth(col('pickup_datetime')).alias('pickup_day'),
+        dayofweek(col('pickup_datetime')).alias('pickup_weekday'),
+        hour(col('pickup_datetime')).alias('pickup_hour')
+    )
+    
     #Get ride of rate higher than $50/mile, not reasonable.
     #Let duration larger than 0.1, which is 6min ride.
-
+    raw_df = raw_df.filter("rate <50")
+    raw_df = raw_df.filter("duration >0.1")
+    #Data should be between 2008 to now+1year
+    raw_df = raw_df.filter("pickup_year >2007 and pickup_year <year(current_date())+1")
+    
+    raw_df = raw_df.select(
+        '*',
+        round(col('trip_distance')/col('duration'),2).alias('speed'),
+        when((col('pickup_weekday')==1) | (col('pickup_weekday')==7), 1).otherwise(0).alias('isweekend')
+    )
+        
+    #New york city has a speed limit as 25mph, but just in case
+    raw_df = raw_df.filter("speed >5 and speed < 100")
+    raw_df = raw_df.select(
+        '*',
+        when(col('speed')>25, 1)
+        .when(col('speed')<10, 3).otherwise(2).alias('traffic')
+    )
 
     if "pickup_longitude" in raw_df.schema.names:
         raw_df = raw_df.filter((raw_df.pickup_latitude != 0) & (raw_df.pickup_longitude != 0))
@@ -153,47 +172,31 @@ def read_clean_csv(s3file):
     return raw_df.select(cols)
 
 def process_tripdata(raw_df, sourceid):
-    #This function uses spark.sql to compute some fields, including pickup_date, pickup_year, pickup_month, pickup_day, pickup_hour, duration, rate, isweekend, isholiday, traffic (based on the speed of the ride), etc.
-    #Prepare data for sql processing
-    sqlContext = SQLContext(spark.sparkContext)
-    #Aggregate data by day, traffic
-    raw_df.registerTempTable('trip_clean_traffic')#Get NY Holidays
-    #Get year list from data
-    df_years = raw_df.select('pickup_year').distinct().orderBy('pickup_year')
-    df_combined = None
-    for row in df_years.rdd.collect():
-        holiday_NY = '","'.join([ date.strftime("%Y-%m-%d") for date, name in sorted(holidays.US(state='NY', years=row['pickup_year']).items())])
-        #Non-holiday
-        df_trip_nonholiday = sqlContext.sql('SELECT * FROM trip_clean_traffic WHERE pickup_year=' + str(row['pickup_year']) + ' AND \
-                                                        pickup_date NOT IN ("' + holiday_NY + '")')
-        df_trip_nonholiday = df_trip_nonholiday.withColumn('isholiday',lit(0))
-        #Holiday
-        df_trip_holiday = sqlContext.sql('SELECT * FROM trip_clean_traffic WHERE pickup_year=' + str(row['pickup_year']) + ' AND \
-                                                        pickup_date IN ("' + holiday_NY + '")')
-        df_trip_holiday = df_trip_holiday.withColumn('isholiday',lit(1)).withColumn('pickup_month',lit(0)).withColumn('isweekend',lit(-1))
-
-        #concatenate current data with historical data in database.
-        df_tmp = df_trip_holiday.union(df_trip_nonholiday)
-        if df_combined is None:
-            df_combined = df_tmp
-        else:
-            df_combined = df_combined.union(df_tmp)
-    #Reorganize data
-    df_combined = df_combined.withColumn('sourceid',lit(sourceid))
+    '''
+    This function uses roadcast join to assign the isholiday column to the dataframe.
+    '''
+    holiday_df = create_holiday_df()
+    tripdata_df = raw_df.join(broadcast(holiday_df),(holiday_df.holiday_year==raw_df.pickup_year) & (holiday_df.holiday_month==raw_df.pickup_month) & (holiday_df.holiday_day==raw_df.pickup_day),how="left")\
+                        .drop('holiday_year','holiday_month','holiday_day')
+    tripdata_df = tripdata_df.withColumn('pickup_month', when(tripdata_df['isholiday']==1,0).otherwise(tripdata_df['pickup_month'])) \
+                             .withColumn('isweekend', when(tripdata_df['isholiday']==1,-1).otherwise(tripdata_df['isweekend'])) \
+                             .na.fill(0,'isholiday') \ 
+                             .withColumn('sourceid',lit(sourceid))
     
-    if "pickup_longitude" in df_combined.schema.names:
+    if "pickup_longitude" in tripdata_df.schema.names:
         cols = ['pickup_datetime', 'dropoff_datetime', 'pickup_latitude', 'pickup_longitude', 'dropoff_latitude','dropoff_longitude', 'passenger_count', 'trip_distance', 'fare_amount', \
                 'pickup_date', 'pickup_year', 'pickup_month', 'pickup_day', 'pickup_hour', 'duration', 'speed', 'traffic', 'rate', 'isholiday','isweekend', 'sourceid']
     else:
         cols = ['pickup_datetime', 'dropoff_datetime', 'PULocationID', 'DOLocationID', 'passenger_count', 'trip_distance', 'fare_amount', \
                 'pickup_date', 'pickup_year', 'pickup_month', 'pickup_day', 'pickup_hour', 'duration', 'speed', 'traffic', 'rate', 'isholiday','isweekend', 'sourceid']
     
-    return df_combined.select(cols)
+    return tripdata_df.select(cols)
 
 def geo2taxizoneid(lat,lng):
-    #Get taxi zone id based on given latitude and longitude.
-    ######
-    #outdated, used stored procedure in postgis instead.
+    '''
+    Get taxi zone id based on given latitude and longitude.
+    Outdated, used stored procedure in postgis instead.
+    '''
     mysql = "SELECT tz.locationid FROM taxi_zones tz WHERE st_within(ST_SetSRID( ST_Point( "+str(lng)+","+str(lat)+"), 4326),tz.geom ) LIMIT 1"
     zoneid = spark.read \
         .format("jdbc") \
@@ -210,7 +213,9 @@ def geo2taxizoneid(lat,lng):
         zoneid_list = zoneid.select('locationid').collect()
         return zoneid_list[0]['locationid']
 def save2db(df,table):
-    # write back to postgis
+    '''
+    write back to postgis
+    '''
     df.write\
         .format("jdbc") \
         .mode("append") \
@@ -222,13 +227,15 @@ def save2db(df,table):
         .save()
     
 def getSourceID(s3file,table):
+    '''
     #############
-    #Register input filename for reference in trip_data table
+    Register input filename for reference in trip_data table
     #############
+    '''
     input_filename = os.path.basename(s3file).lower()
-    rec = Row("filename")
-    rec = rec(input_filename)
-    df = spark.createDataFrame(Row(rec))
+    data = [tuple([input_filename])]
+    schema = ['filename']
+    df = spark.createDataFrame(data).toDF(*schema)
     try:
         df.write\
                 .format("jdbc") \
