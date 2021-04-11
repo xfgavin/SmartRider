@@ -26,7 +26,7 @@ def main(s3file, sourceid):
     else:
         save2db(tripdata_df,'tripdata')
     
-def create_holiday_df:
+def create_holiday_df():
     '''
     Create a holiday dataframe containing holidays ranging from 2008 to current year +1
     Since this dataframe is small, broadcast join will be used to join with raw_df
